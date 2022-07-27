@@ -9,10 +9,11 @@ use Filament\Resources\Form;
 use Filament\Resources\Table;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\MultiSelect;
 use App\Filament\Resources\UserResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\UserResource\RelationManagers;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\MultiSelect;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Livewire\Component;
@@ -27,19 +28,21 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                
-                TextInput::make('password')
-                    ->password()
-                    ->required()
-                    ->maxLength(255),
-                MultiSelect::make('roles')->relationship('roles', 'name')
+                Card::make()->schema([
+                    TextInput::make('name')
+                                ->required()
+                                ->maxLength(255),
+                    TextInput::make('email')
+                                ->email()
+                                ->required()
+                                ->maxLength(255),
+                    
+                    TextInput::make('password')
+                                ->password()
+                                ->required()
+                                ->maxLength(255),
+                    MultiSelect::make('roles')->relationship('roles', 'name')
+                ])
             ]);
     }
 
@@ -51,6 +54,12 @@ class UserResource extends Resource
                             ->sortable()
                             ->searchable(),
                 TextColumn::make('email'),
+                TextColumn::make('email_varified_at')
+                            ->toggleable(isToggledHiddenByDefault : true),
+                TextColumn::make('created_at')
+                            ->toggleable(isToggledHiddenByDefault : true),
+                TextColumn::make('updated_at')
+                            ->toggleable(isToggledHiddenByDefault : true),
             ])
             ->defaultSort('name')
             ->filters([
@@ -58,7 +67,7 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
 
             ])
             ->bulkActions([
