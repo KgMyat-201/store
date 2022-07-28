@@ -169,7 +169,7 @@ return [
     |
     */
 
-    'dark_mode' => false,
+    'dark_mode' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -187,7 +187,7 @@ return [
         'actions' => [
             'modal' => [
                 'actions' => [
-                    'alignment' => 'left',
+                    'alignment' => 'right',
                 ],
             ],
         ],
@@ -206,7 +206,7 @@ return [
             'alignment' => 'center',
         ],
         'sidebar' => [
-            'is_collapsible_on_desktop' => false,
+            'is_collapsible_on_desktop' => true,
             'groups' => [
                 'are_collapsible' => true,
             ],

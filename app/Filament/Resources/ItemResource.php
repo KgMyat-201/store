@@ -2,16 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ItemResource\Pages;
-use App\Filament\Resources\ItemResource\RelationManagers;
-use App\Models\Item;
+use Closure;
 use Filament\Forms;
-use Filament\Resources\Form;
-use Filament\Resources\Resource;
-use Filament\Resources\Table;
+use App\Models\Item;
 use Filament\Tables;
+use App\Models\Category;
+use Illuminate\Support\Str;
+use Filament\Resources\Form;
+use Filament\Resources\Table;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\ItemResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\ItemResource\RelationManagers;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Tables\Columns\TextColumn;
 
 class ItemResource extends Resource
 {
@@ -23,19 +33,24 @@ class ItemResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('category_id')
-                    ->required(),
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('content')
-                    ->required()
-                    ->maxLength(65535),
-                Forms\Components\Toggle::make('is_published')
-                    ->required(),
+                Card::make()->schema([
+                    
+                    Select::make('category_id')
+                            ->label('Category')
+                            ->options(Category::all()->pluck('name', 'id'))
+                            ->searchable(),
+                    TextInput::make('name')
+                            ->reactive()
+                            ->afterStateUpdated(function (Closure $set, $state) {
+                                $set('slug', Str::slug($state));
+                            }),
+                    TextInput::make('slug'),
+                    RichEditor::make('content'),
+                    Toggle::make('is_published')
+                            ->onIcon('heroicon-s-lightning-bolt')
+                            ->offIcon('heroicon-s-user'),
+                    
+                ])
             ]);
     }
 
@@ -43,21 +58,26 @@ class ItemResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('category_id'),
-                Tables\Columns\TextColumn::make('title'),
-                Tables\Columns\TextColumn::make('slug'),
-                Tables\Columns\TextColumn::make('content'),
-                Tables\Columns\BooleanColumn::make('is_published'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime(),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime(),
+                TextColumn::make('category_id')
+                            ->label('Category')
+                            ->searchable(),
+                TextColumn::make('title')
+                            ->sortable()
+                            ->searchable(),
+                TextColumn::make('slug')
+                            ->toggleable(isToggledHiddenByDefault : true),
+                TextColumn::make('content')
+                            ->toggleable(isToggledHiddenByDefault : true),
+                BooleanColumn::make('is_published')
+                            ->toggleable(isToggledHiddenByDefault : false),
+                
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
